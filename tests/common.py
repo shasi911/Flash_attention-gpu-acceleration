@@ -84,8 +84,10 @@ def _setup_process_group(rank, world_size, backend):
     else:
         device = "cpu"
     # initialize the process group
-    # PyTorch 2.6 defaults to libuv for TCPStore; disable it on builds without libuv support.
-    os.environ.setdefault("USE_LIBUV", "0")
+    # On Windows, PyTorch 2.6's TCPStore defaults to libuv which may not be available.
+    import sys
+    if sys.platform == "win32":
+        os.environ.setdefault("USE_LIBUV", "0")
     dist.init_process_group(backend, rank=rank, world_size=world_size)
     return device
 
